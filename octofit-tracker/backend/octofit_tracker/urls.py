@@ -26,15 +26,25 @@ router.register(r'activities', views.ActivityViewSet)
 router.register(r'workouts', views.WorkoutViewSet)
 router.register(r'leaderboard', views.LeaderboardViewSet)
 
+import os
+from rest_framework.response import Response
+from rest_framework.reverse import reverse
+
+def get_base_url(request):
+    codespace_name = os.environ.get('CODESPACE_NAME')
+    if codespace_name:
+        return f"https://{codespace_name}-8000.app.github.dev"
+    scheme = 'https' if request.is_secure() else 'http'
+    return f"{scheme}://{request.get_host()}"
+
 def api_root(request):
-    from rest_framework.response import Response
-    from rest_framework.reverse import reverse
+    base_url = get_base_url(request)
     return Response({
-        'users': reverse('user-list', request=request),
-        'teams': reverse('team-list', request=request),
-        'activities': reverse('activity-list', request=request),
-        'workouts': reverse('workout-list', request=request),
-        'leaderboard': reverse('leaderboard-list', request=request),
+        'users': f'{base_url}/api/users/',
+        'teams': f'{base_url}/api/teams/',
+        'activities': f'{base_url}/api/activities/',
+        'workouts': f'{base_url}/api/workouts/',
+        'leaderboard': f'{base_url}/api/leaderboard/',
     })
 
 urlpatterns = [
